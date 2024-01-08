@@ -59,6 +59,7 @@ while True:
                 username = input('Enter username: ')
                 cv2.imwrite(username + '.jpg', small_frame)
 
+            # Moves img into data directory
             shutil.move(CURRENT_DIR + username + '.jpg', DIR + '\\' + username + '.jpg')
                     
 
