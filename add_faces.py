@@ -10,8 +10,8 @@ import face_recognition
 
 DIR = 'C:\\Users\\tocar\\Documents\\Code\\AttendanceSystem\\Face-Recognition-Attendance\\data'
 CURRENT_DIR = 'C:\\Users\\tocar\\Documents\\Code\\AttendanceSystem\\Face-Recognition-Attendance\\'
-dir_size = sum(os.path.getsize(f) for f in os.listdir(DIR) if os.path.isfile(f))
-print(dir_size)
+dir_size = len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
+print(os.listdir(DIR))
 
 cam = cv2.VideoCapture(0)
 
@@ -55,12 +55,22 @@ while True:
                 else:
                     username = input('Enter username: ')
                     cv2.imwrite(username + '.jpg', small_frame)
+                    # Moves img into data directory
+                    shutil.move(CURRENT_DIR + username + '.jpg', DIR + '\\' + username + '.jpg')
+                    img = face_recognition.load_image_file('data\\'+ username + '.jpg')
+                    face_encodings.append(face_recognition.face_encodings(img[0]))
+                    print('Image: ' + username + '.jpg has been added to ' + DIR)
+                    dir_size += 1
+                    
             else:
                 username = input('Enter username: ')
                 cv2.imwrite(username + '.jpg', small_frame)
-
-            # Moves img into data directory
-            shutil.move(CURRENT_DIR + username + '.jpg', DIR + '\\' + username + '.jpg')
+                # Moves img into data directory
+                shutil.move(CURRENT_DIR + username + '.jpg', DIR + '\\' + username + '.jpg')
+                img = face_recognition.load_image_file('data\\'+ username + '.jpg')
+                face_encodings.append(face_recognition.face_encodings(img[0]))
+                print('Image: ' + username + '.jpg has been added to ' + DIR)
+                dir_size += 1            
                     
 
     # Display the resulting image
