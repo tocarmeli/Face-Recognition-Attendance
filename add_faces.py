@@ -11,7 +11,6 @@ import face_recognition
 DIR = 'C:\\Users\\tocar\\Documents\\Code\\AttendanceSystem\\Face-Recognition-Attendance\\data'
 CURRENT_DIR = 'C:\\Users\\tocar\\Documents\\Code\\AttendanceSystem\\Face-Recognition-Attendance\\'
 dir_size = len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
-print(os.listdir(DIR))
 
 cam = cv2.VideoCapture(0)
 
@@ -44,10 +43,8 @@ while True:
 
             # # If a match was found in known_face_encodings, just use the first one.
             # if True in matches:
-            #     first_match_index = matches.index(True)
-            #     name = known_face_names[first_match_index]
             if dir_size != 0:
-                face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+                face_distances = face_recognition.face_distance(face_encoding, known_face_encodings)
                 best_match_index = np.argmin(face_distances)
                 # Checks to see if face exists in DIR
                 if matches[best_match_index]:
@@ -57,8 +54,8 @@ while True:
                     cv2.imwrite(username + '.jpg', small_frame)
                     # Moves img into data directory
                     shutil.move(CURRENT_DIR + username + '.jpg', DIR + '\\' + username + '.jpg')
-                    img = face_recognition.load_image_file('data\\'+ username + '.jpg')
-                    face_encodings.append(face_recognition.face_encodings(img[0]))
+                    img = face_recognition.load_image_file('data\\' + username + '.jpg')
+                    known_face_encodings.append(face_recognition.face_encodings(img)[0])
                     print('Image: ' + username + '.jpg has been added to ' + DIR)
                     dir_size += 1
                     
@@ -67,11 +64,10 @@ while True:
                 cv2.imwrite(username + '.jpg', small_frame)
                 # Moves img into data directory
                 shutil.move(CURRENT_DIR + username + '.jpg', DIR + '\\' + username + '.jpg')
-                img = face_recognition.load_image_file('data\\'+ username + '.jpg')
-                face_encodings.append(face_recognition.face_encodings(img[0]))
+                img = face_recognition.load_image_file('data\\' + username + '.jpg')
+                known_face_encodings.append(face_recognition.face_encodings(img)[0])
                 print('Image: ' + username + '.jpg has been added to ' + DIR)
-                dir_size += 1            
-                    
+                dir_size += 1
 
     # Display the resulting image
     cv2.imshow('Video', frame)
