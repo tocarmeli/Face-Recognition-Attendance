@@ -2,10 +2,31 @@ import face_recognition
 import cv2
 import os
 import numpy as np
+import mysql.connector
+from datetime import date, datetime
 
 # Directory as to where user photos are currently stored
 DIR = 'C:\\Users\\tocar\\Documents\\Code\\AttendanceSystem\\Face-Recognition-Attendance\\data'
+tdy = date.today().strftime('%m_%d_%Y')
+tme = str(datetime.now().strftime("%H:%M:%S"))
 
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="root",
+    database="known_faces",
+    auth_plugin='mysql_native_password'
+    )
+
+my_cursor = db.cursor()
+my_cursor.execute('Show TABLES LIKE %s', (tdy,))
+result = my_cursor.fetchone()
+
+if result is None:
+    my_cursor.execute(f'CREATE TABLE {tdy} (name VARCHAR(20), time VARCHAR(15))')
+    db.commit()
+
+my_cursor.close()
 cam = cv2.VideoCapture(0)
 
 known_face_encodings = []
@@ -13,10 +34,9 @@ known_names = [] # array of all user names
 
 # Loads all pictures from DIR
 for image in os.listdir(DIR):
-    name = input('Enter user name: ')
     img = face_recognition.load_image_file('data\\' + image)
     known_face_encodings.append(face_recognition.face_encodings(img)[0])
-    known_names.append(name)
+    known_names.append(image[:-4:])
 
 face_locations = []
 face_encodings = [] # Encodings of all the new faces, will be used to match with known_face_encodings
@@ -50,6 +70,19 @@ while True:
                 name = known_names[best_match_index]
 
             names.append(name)
+
+            if len(names) > 0:
+                my_cursor = db.cursor()
+
+                for name in names:
+                    my_cursor.execute(f'SELECT * FROM {tdy} WHERE name = %s', (name,))
+                    result = my_cursor.fetchone()
+
+                    if result is None:
+                        sql = f"INSERT INTO {tdy} (name, time) VALUES (%s, %s)"
+                        val = (name, tme)
+                        my_cursor.execute(sql, val)
+                        db.commit()
 
     process_frame = not process_frame
     for (top, right, bottom, left), name in zip(face_locations, names):
